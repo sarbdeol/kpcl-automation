@@ -32,7 +32,7 @@ sudo chmod +x /usr/local/bin/chromedriver
 # Clone repository
 echo "📥 Cloning repository..."
 cd /home/ec2-user
-git clone https://github.com/yourusername/kpcl-automation.git
+git clone https://github.com/themanojgowda/kpcl-automation.git
 cd kpcl-automation
 
 # Create virtual environment

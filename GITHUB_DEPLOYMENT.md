@@ -32,7 +32,7 @@ git push -u origin main
 Then run:
 ```bash
 cd "/Users/manoj1.warpd.con/kpcl requests"
-git remote add origin https://github.com/YOUR_USERNAME/kpcl-automation.git
+git remote add origin https://github.com/themanojgowda/kpcl-automation.git
 git push -u origin main
 ```
 
@@ -52,7 +52,7 @@ git push -u origin main
 ssh -i your-key.pem ec2-user@YOUR_EC2_PUBLIC_IP
 
 # Run automated deployment
-wget https://raw.githubusercontent.com/YOUR_USERNAME/kpcl-automation/main/deploy-ec2.sh
+wget https://raw.githubusercontent.com/themanojgowda/kpcl-automation/main/deploy-ec2.sh
 chmod +x deploy-ec2.sh
 ./deploy-ec2.sh
 
