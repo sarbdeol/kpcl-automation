@@ -1,0 +1,386 @@
+/* KPCL Automation Custom Styles */
+
+:root {
+    --primary-color: #0066cc;
+    --success-color: #28a745;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --info-color: #17a2b8;
+    --light-gray: #f8f9fa;
+    --border-radius: 8px;
+}
+
+body {
+    background-color: var(--light-gray);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Status Indicators */
+.status-icon {
+    transition: all 0.3s ease;
+}
+
+.status-idle { color: #6c757d !important; }
+.status-running { color: var(--info-color) !important; animation: pulse 2s infinite; }
+.status-success { color: var(--success-color) !important; }
+.status-error { color: var(--danger-color) !important; }
+.status-scheduled { color: var(--warning-color) !important; }
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+/* Cards */
+.card {
+    border-radius: var(--border-radius);
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.card-header {
+    border-radius: var(--border-radius) var(--border-radius) 0 0 !important;
+    border-bottom: 1px solid #e9ecef;
+    padding: 1rem 1.25rem;
+}
+
+/* Activity Log */
+.activity-log {
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 0.5rem;
+    background-color: #f8f9fa;
+    border-radius: var(--border-radius);
+    border: 1px solid #e9ecef;
+}
+
+.log-entry {
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    border-radius: 4px;
+    border-left: 3px solid #dee2e6;
+    background-color: white;
+    transition: all 0.3s ease;
+}
+
+.log-entry:last-child {
+    margin-bottom: 0;
+}
+
+.log-entry.log-info {
+    border-left-color: var(--info-color);
+    background-color: #e7f3ff;
+}
+
+.log-entry.log-success {
+    border-left-color: var(--success-color);
+    background-color: #e8f5e8;
+}
+
+.log-entry.log-warning {
+    border-left-color: var(--warning-color);
+    background-color: #fff8e1;
+}
+
+.log-entry.log-error {
+    border-left-color: var(--danger-color);
+    background-color: #ffebee;
+}
+
+.log-entry .log-time {
+    font-size: 0.75rem;
+    color: #6c757d;
+    float: right;
+}
+
+.log-entry .log-message {
+    margin: 0;
+    font-size: 0.875rem;
+}
+
+.log-entry .log-icon {
+    margin-right: 0.5rem;
+    width: 1rem;
+}
+
+/* Buttons */
+.btn {
+    border-radius: var(--border-radius);
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.btn-lg {
+    padding: 0.75rem 1.5rem;
+    font-size: 1.1rem;
+}
+
+/* Forms */
+.form-control, .form-select {
+    border-radius: var(--border-radius);
+    border: 1px solid #ced4da;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(0, 102, 204, 0.25);
+}
+
+.form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+/* Navbar */
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.25rem;
+}
+
+/* Progress */
+.progress {
+    height: 0.5rem;
+    border-radius: var(--border-radius);
+}
+
+.progress-bar {
+    transition: width 0.3s ease;
+}
+
+/* Alerts */
+.alert {
+    border-radius: var(--border-radius);
+    border: none;
+    font-weight: 500;
+}
+
+/* Custom Toggle Switch */
+.form-switch .form-check-input {
+    width: 3rem;
+    height: 1.5rem;
+    border-radius: 1rem;
+    cursor: pointer;
+}
+
+.form-switch .form-check-input:checked {
+    background-color: var(--success-color);
+    border-color: var(--success-color);
+}
+
+/* Status Badge */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.375rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.status-badge i {
+    margin-right: 0.375rem;
+}
+
+.status-badge.badge-idle {
+    background-color: #f8f9fa;
+    color: #6c757d;
+    border: 1px solid #dee2e6;
+}
+
+.status-badge.badge-running {
+    background-color: #cce7ff;
+    color: var(--info-color);
+    border: 1px solid var(--info-color);
+}
+
+.status-badge.badge-success {
+    background-color: #d4edda;
+    color: var(--success-color);
+    border: 1px solid var(--success-color);
+}
+
+.status-badge.badge-error {
+    background-color: #f8d7da;
+    color: var(--danger-color);
+    border: 1px solid var(--danger-color);
+}
+
+/* Loading Spinner */
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        padding: 0 1rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .btn {
+        font-size: 0.875rem;
+    }
+    
+    .activity-log {
+        max-height: 250px;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #1a1a1a;
+        color: #e9ecef;
+    }
+    
+    .card {
+        background-color: #2d3748;
+        color: #e9ecef;
+    }
+    
+    .card-header {
+        background-color: #2d3748 !important;
+        border-bottom-color: #4a5568;
+    }
+    
+    .activity-log {
+        background-color: #1a202c;
+        border-color: #4a5568;
+    }
+    
+    .log-entry {
+        background-color: #2d3748;
+        border-left-color: #4a5568;
+    }
+    
+    .form-control, .form-select {
+        background-color: #2d3748;
+        border-color: #4a5568;
+        color: #e9ecef;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        background-color: #2d3748;
+        color: #e9ecef;
+    }
+}
+
+/* Animation for new log entries */
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.log-entry.new-entry {
+    animation: slideInRight 0.3s ease-out;
+}
+
+/* Custom scrollbar */
+.activity-log::-webkit-scrollbar {
+    width: 6px;
+}
+
+.activity-log::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.activity-log::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.activity-log::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Toast notifications */
+.toast {
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.toast-header {
+    background-color: white;
+    border-bottom: 1px solid #e9ecef;
+}
+
+/* Configuration page specific styles */
+.config-section {
+    margin-bottom: 2rem;
+}
+
+.config-section h6 {
+    color: var(--primary-color);
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+/* Real-time updates indicator */
+.live-indicator {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.75rem;
+    color: var(--success-color);
+}
+
+.live-indicator::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background-color: var(--success-color);
+    border-radius: 50%;
+    margin-right: 0.375rem;
+    animation: pulse 2s infinite;
+}
+
+/* Connection status */
+.connection-status {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius);
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.connection-status.connected {
+    background-color: var(--success-color);
+    color: white;
+}
+
+.connection-status.disconnected {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+.connection-status.connecting {
+    background-color: var(--warning-color);
+    color: #212529;
+}
