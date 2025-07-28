@@ -338,4 +338,6 @@ if __name__ == '__main__':
     logger.info("Starting KPCL Automation Application")
     
     # Run the application
-    socketio.run(app, host='0.0.0.0', port=5001, debug=True)
+    socketio.run(app, host='0.0.0.0', port=5001, debug=True, allow_unsafe_werkzeug=True)
+
+
