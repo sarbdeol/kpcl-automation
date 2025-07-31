@@ -34,31 +34,55 @@ class SeleniumHandler:
         self.wait = None
         
     def start_driver(self):
-        """Start the WebDriver"""
-        try:
-            browser = self.config.get('browser', 'chrome').lower()
-            headless = self.config.get('headless', True)
-            
-            if browser == 'chrome':
-                self.driver = self._create_chrome_driver(headless)
-            elif browser == 'firefox':
-                self.driver = self._create_firefox_driver(headless)
-            else:
-                raise ValueError(f"Unsupported browser: {browser}")
-            
-            # Set up WebDriverWait
-            self.wait = WebDriverWait(self.driver, 30)
-            
-            # Configure driver settings
-            self.driver.implicitly_wait(10)
-            self.driver.maximize_window()
-            
-            logger.info(f"WebDriver started successfully: {browser}")
-            return True
-            
-        except Exception as e:
-            logger.error(f"Failed to start WebDriver: {e}")
-            return False
+        """Start the WebDriver with retry logic"""
+        max_retries = 3
+        retry_count = 0
+        
+        while retry_count < max_retries:
+            try:
+                browser = self.config.get('browser', 'chrome').lower()
+                headless = self.config.get('headless', True)
+                
+                logger.info(f"Starting WebDriver attempt {retry_count + 1}/{max_retries}")
+                
+                if browser == 'chrome':
+                    self.driver = self._create_chrome_driver(headless)
+                elif browser == 'firefox':
+                    self.driver = self._create_firefox_driver(headless)
+                else:
+                    raise ValueError(f"Unsupported browser: {browser}")
+                
+                if self.driver is None:
+                    raise Exception("WebDriver creation returned None")
+                
+                # Set up WebDriverWait
+                self.wait = WebDriverWait(self.driver, 30)
+                
+                # Configure driver settings
+                self.driver.implicitly_wait(10)
+                self.driver.maximize_window()
+                
+                logger.info(f"WebDriver started successfully: {browser}")
+                return True
+                
+            except Exception as e:
+                retry_count += 1
+                logger.error(f"WebDriver start attempt {retry_count} failed: {e}")
+                
+                # Clean up failed driver
+                if self.driver:
+                    try:
+                        self.driver.quit()
+                    except:
+                        pass
+                    self.driver = None
+                
+                if retry_count < max_retries:
+                    logger.info(f"Retrying WebDriver start in 2 seconds...")
+                    time.sleep(2)
+                else:
+                    logger.error("All WebDriver start attempts failed")
+                    return False
     
     def _create_chrome_driver(self, headless=True):
         """Create Chrome WebDriver with robust error handling"""
@@ -359,31 +383,30 @@ class SeleniumHandler:
                 pass
             return None
     
-    def handle_possible_alerts(self, timeout=5):
-        """Handle any possible alerts that might appear"""
+    def handle_possible_alerts(self, timeout=2):
+        """Handle any possible alerts with reduced timeout and fewer attempts"""
         try:
-            # Try to handle alert multiple times as some sites show multiple alerts
-            for attempt in range(3):
-                alert_text = self.handle_alert(accept=True, timeout=timeout)
-                if alert_text is None:
-                    break
-                logger.info(f"Alert {attempt + 1} handled: {alert_text}")
-                time.sleep(0.5)  # Brief pause between alerts
+            # Reduce to single attempt instead of 3 attempts to speed up
+            alert_text = self.handle_alert(accept=True, timeout=timeout)
+            if alert_text:
+                logger.info(f"Alert handled: {alert_text}")
+            # Remove the loop and sleep that was causing delays
         except Exception as e:
-            logger.debug(f"Alert handling completed with minor issues: {e}")
+            logger.debug(f"Alert handling completed: {e}")
     
-    def wait_for_element_robust(self, by, value, timeout=60):
-        """Wait for element with robust error handling and alert management"""
+    def wait_for_element_robust(self, by, value, timeout=30):
+        """Wait for element with optimized timeout and minimal alert handling"""
         try:
-            # First handle any possible alerts
-            self.handle_possible_alerts()
+            # Quick alert check without long timeout
+            self.handle_possible_alerts(timeout=1)
             
             # Then wait for element
             wait = WebDriverWait(self.driver, timeout)
             element = wait.until(EC.presence_of_element_located((by, value)))
             
-            # Handle alerts again in case they appeared during wait
-            self.handle_possible_alerts(timeout=2)
+            # Only handle alerts again if this is a clickable element that might trigger them
+            if by == By.ID and ("btn" in value.lower() or "button" in value.lower()):
+                self.handle_possible_alerts(timeout=1)
             
             return element
             

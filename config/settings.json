@@ -1,5 +1,5 @@
 {
-  "schedule_time": "07:00:01:01",
-  "max_retries": 3,
+  "schedule_time": "09:10:01:01",
+  "max_retries": 1,
   "retry_interval": 10
 }

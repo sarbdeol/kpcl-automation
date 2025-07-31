@@ -3,23 +3,34 @@ Description=KPCL Automation System
 After=network.target
 
 [Service]
-Type=simple
+Type=exec
 User=ec2-user
+Group=ec2-user
 WorkingDirectory=/home/ec2-user/kpcl-automation
-Environment=PATH=/home/ec2-user/kpcl-automation/venv/bin
-ExecStart=/home/ec2-user/kpcl-automation/venv/bin/python app.py
+Environment=PATH=/home/ec2-user/kpcl-automation/venv/bin:/usr/local/bin:/usr/bin:/bin
+Environment=PYTHONPATH=/home/ec2-user/kpcl-automation
+ExecStart=/home/ec2-user/kpcl-automation/venv/bin/gunicorn --config /home/ec2-user/kpcl-automation/gunicorn.conf.py app:app
+ExecReload=/bin/kill -s HUP $MAINPID
+KillMode=mixed
+TimeoutStopSec=5
+PrivateTmp=true
 Restart=always
 RestartSec=10
 
 # Environment variables
-EnvironmentFile=/home/ec2-user/kpcl-automation/.env
+EnvironmentFile=-/home/ec2-user/kpcl-automation/.env
 
 # Security settings
-NoNewPrivileges=true
-PrivateTmp=true
-ProtectSystem=strict
-ProtectHome=true
+NoNewPrivileges=false
+# ProtectSystem=strict
+# ProtectHome=true
 ReadWritePaths=/home/ec2-user/kpcl-automation
+# RestrictRealtime=true
+# RestrictNamespaces=true
+
+# Resource limits
+LimitNOFILE=65536
+MemoryMax=1G
 
 [Install]
 WantedBy=multi-user.target

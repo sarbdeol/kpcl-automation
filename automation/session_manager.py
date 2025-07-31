@@ -79,56 +79,78 @@ class SessionManager:
             
             # Navigate to login page
             logger.info("Navigating to login page")
+            page_start_time = time.time()
             if not self.selenium.navigate_to(self.login_url):
                 return False, "Failed to navigate to login page"
             
             # Handle any initial alerts
-            self.selenium.handle_possible_alerts(timeout=10)
+            self.selenium.handle_possible_alerts(timeout=3)
             
-            # Wait for username field to be available
-            username_element = self.selenium.wait_for_element_robust(By.ID, "username", timeout=30)
+            # Wait for username field to be available (reduce timeout for immediate elements)
+            logger.info("Waiting for username field...")
+            username_start_time = time.time()
+            username_element = self.selenium.wait_for_element_robust(By.ID, "username", timeout=15)
             if not username_element:
                 return False, "Username field not found"
             
+            username_wait_time = time.time() - username_start_time
+            logger.info(f"Username field found after {username_wait_time:.2f} seconds")
+            
             # Fill username
             logger.info("Filling username")
+            username_fill_start = time.time()
             username_element.clear()
             username_element.send_keys(username)
+            username_fill_time = time.time() - username_fill_start
+            logger.info(f"Username filled in {username_fill_time:.2f} seconds")
             
-            # Handle any alerts after username entry
-            self.selenium.handle_possible_alerts(timeout=5)
+            # Reduce alert handling after username (field typing shouldn't trigger alerts)
+            # self.selenium.handle_possible_alerts(timeout=5)  # Commented out to reduce delay
             
-            # Wait for password field
-            password_element = self.selenium.wait_for_element_robust(By.ID, "password", timeout=30)
+            # Wait for password field (should be immediate after username)
+            logger.info("Waiting for password field...")
+            password_start_time = time.time()
+            password_element = self.selenium.wait_for_element_robust(By.ID, "password", timeout=10)
             if not password_element:
                 return False, "Password field not found"
             
+            password_wait_time = time.time() - password_start_time
+            logger.info(f"Password field found after {password_wait_time:.2f} seconds")
+            
             # Fill password
             logger.info("Filling password")
+            password_fill_start = time.time()
             password_element.clear()
             password_element.send_keys(password)
+            password_fill_time = time.time() - password_fill_start
+            logger.info(f"Password filled in {password_fill_time:.2f} seconds")
             
-            # Handle any alerts after password entry
-            self.selenium.handle_possible_alerts(timeout=5)
+            # Only handle alerts if OTP button click might trigger them
             
-            # Wait for Generate OTP button
-            otp_button = self.selenium.wait_for_element_robust(By.ID, "generateOtpBtn", timeout=30)
+            # Wait for Generate OTP button (should be immediate after password)
+            logger.info("Waiting for Generate OTP button...")
+            otp_button_start_time = time.time()
+            otp_button = self.selenium.wait_for_element_robust(By.ID, "generateOtpBtn", timeout=15)
             if not otp_button:
                 return False, "Generate OTP button not found"
             
+            otp_button_wait_time = time.time() - otp_button_start_time
+            logger.info(f"Generate OTP button found after {otp_button_wait_time:.2f} seconds")
+            
             # Click Generate OTP button
             logger.info("Clicking Generate OTP button")
+            otp_start_time = time.time()
             otp_button.click()
             
             # Handle any alerts after clicking OTP button
             self.selenium.handle_possible_alerts(timeout=10)
             
-            # Wait for OTP section to appear
-            time.sleep(5)
-            
-            # Check if OTP section is visible
-            otp_section = self.selenium.wait_for_element_robust(By.ID, "otpSection", timeout=30)
+            # Wait for OTP section to appear with more aggressive timeout
+            logger.info("Waiting for OTP section to become available...")
+            otp_section = self.selenium.wait_for_element_robust(By.ID, "otpSection", timeout=45)
             if otp_section and otp_section.is_displayed():
+                otp_wait_time = time.time() - otp_start_time
+                logger.info(f"OTP section appeared after {otp_wait_time:.2f} seconds")
                 self.otp_required = True
                 logger.info("OTP required for login")
                 return True, "OTP sent. Please enter OTP to continue."
@@ -185,8 +207,15 @@ class SessionManager:
             # Handle alerts immediately after OTP verification
             self.selenium.handle_possible_alerts(timeout=15)
             
-            # Additional wait for page processing
-            time.sleep(5)
+            # Wait for page processing with dynamic check instead of fixed sleep
+            wait_time = 0
+            max_wait = 10
+            while wait_time < max_wait:
+                current_url = self.selenium.get_current_url()
+                if current_url and ("dashboard" in current_url or "user" in current_url):
+                    break
+                time.sleep(1)
+                wait_time += 1
             
             # Check current URL for successful redirect
             current_url = self.selenium.get_current_url()
