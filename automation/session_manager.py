@@ -342,6 +342,7 @@ class SessionManager:
             # Try to navigate to dashboard
             self.selenium.navigate_to(self.dashboard_url)
             time.sleep(2)
+            self.selenium.save_screenshot("session_check.png")
             
             # Check if we're redirected to login
             current_url = self.selenium.get_current_url()
