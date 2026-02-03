@@ -86,53 +86,46 @@ class SeleniumHandler:
     
     def _create_chrome_driver(self, headless=True):
         """
-        Create Chrome WebDriver with robust fallback logic.
-        Compatible with macOS, Linux, and server environments.
+        Robust Chrome WebDriver factory.
+        Linux / macOS / Server safe.
         """
 
         options = ChromeOptions()
 
-        # Headless (new mode is REQUIRED for modern Chrome)
         if headless:
             options.add_argument("--headless=new")
 
-        # Stability flags (important for servers)
+        # Server stability flags
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--disable-gpu")
         options.add_argument("--window-size=1920,1080")
-        # Set Chrome to use a specific port
-        options.add_argument("--remote-debugging-port=9222")
 
-        # User agent
+        # ⚠️ REMOVE remote-debugging unless you really need it
+        # options.add_argument("--remote-debugging-port=9222")
+
+        # ✅ DO NOT hardcode Chrome version in UA
         options.add_argument(
             "--user-agent=Mozilla/5.0 (X11; Linux x86_64) "
             "AppleWebKit/537.36 (KHTML, like Gecko) "
             "Chrome Safari/537.36"
         )
 
-        # Disable notifications, popups, images
+        # Disable notifications, images
         prefs = {
             "profile.default_content_setting_values.notifications": 2,
-            "profile.default_content_settings.popups": 0,
             "profile.managed_default_content_settings.images": 2,
         }
         options.add_experimental_option("prefs", prefs)
 
-        # macOS Chrome binary (safe to set, ignored on Linux)
-        chrome_binary_mac = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-        if os.path.exists(chrome_binary_mac):
-            options.binary_location = chrome_binary_mac
-
-        # -------- DRIVER RESOLUTION ORDER --------
-        # 1. Local project chromedriver
-        # 2. webdriver-manager
-        # 3. System PATH chromedriver
-        # ----------------------------------------
+        # macOS binary (ignored on Linux)
+        mac_chrome = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+        if os.path.exists(mac_chrome):
+            options.binary_location = mac_chrome
 
         errors = []
 
-        # Method 1: Local project chromedriver
+        # -------- Method 1: Local chromedriver --------
         try:
             local_driver = os.path.join(
                 os.path.dirname(os.path.dirname(__file__)), "chromedriver"
@@ -144,26 +137,20 @@ class SeleniumHandler:
         except Exception as e:
             errors.append(f"Local chromedriver failed: {e}")
 
-        # Method 2: webdriver-manager (recommended)
+        # -------- Method 2: webdriver-manager (PRIMARY) --------
         try:
             logger.info("Using webdriver-manager ChromeDriver")
 
             driver_path = ChromeDriverManager().install()
 
-            # 🔥 CRITICAL FIX FOR WINDOWS
-            if driver_path.endswith(".chromedriver"):
-                driver_path = os.path.join(os.path.dirname(driver_path), "chromedriver.exe")
-
-            if not os.path.exists(driver_path):
-                raise RuntimeError(f"chromedriver.exe not found at {driver_path}")
-
-            service = ChromeService(executable_path=driver_path)
+            # ✅ DO NOT manipulate path on Linux/macOS
+            service = ChromeService(driver_path)
             return webdriver.Chrome(service=service, options=options)
 
         except Exception as e:
             errors.append(f"WebDriverManager failed: {e}")
 
-        # Method 3: chromedriver from PATH
+        # -------- Method 3: System PATH --------
         try:
             chromedriver_path = shutil.which("chromedriver")
             if chromedriver_path:
@@ -173,11 +160,10 @@ class SeleniumHandler:
         except Exception as e:
             errors.append(f"System chromedriver failed: {e}")
 
-        # -------- FINAL FAILURE --------
         raise RuntimeError(
-            "Failed to initialize Chrome WebDriver.\n"
-            + "\n".join(errors)
+            "Failed to initialize Chrome WebDriver:\n" + "\n".join(errors)
         )
+
     def _create_firefox_driver(self, headless=True):
         """Create Firefox WebDriver"""
         options = FirefoxOptions()
