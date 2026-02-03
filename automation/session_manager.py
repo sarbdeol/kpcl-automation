@@ -334,7 +334,8 @@ class SessionManager:
                 return False
             
             current_url = self.selenium.get_current_url()
-            
+            print(f"Checking session validity, current URL: {current_url}")
+            self.selenium.driver.save_screenshot("current_url.png")
             # If we're on login page, session is not valid
             if current_url and ("signin" in current_url or "login" in current_url):
                 return False
