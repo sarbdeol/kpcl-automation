@@ -10,7 +10,29 @@ from selenium.webdriver.support import expected_conditions as EC
 from automation.selenium_handler import SeleniumHandler
 
 logger = logging.getLogger(__name__)
+import json,os
 
+def save_cookies(driver, path="cookies.json"):
+    with open(path, "w") as f:
+        json.dump(driver.get_cookies(), f)
+def load_cookies(driver, base_url, path="cookies.json"):
+    if not os.path.exists(path):
+        return False
+
+    driver.get(base_url)  # must be same domain
+
+    with open(path, "r") as f:
+        cookies = json.load(f)
+
+    for cookie in cookies:
+        cookie.pop("sameSite", None)  # Selenium compatibility
+        try:
+            driver.add_cookie(cookie)
+        except Exception:
+            pass
+
+    driver.refresh()
+    return True
 class SessionManager:
     """Manages KPCL website sessions and authentication"""
     
@@ -35,15 +57,26 @@ class SessionManager:
         self.gatepass_url = f"{self.base_url}/user/gatepass.php"
     
     def start_session(self):
-        """Start a new browser session"""
         try:
             success = self.selenium.start_driver()
-            if success:
-                logger.info("Browser session started")
-                return True
-            else:
+            if not success:
                 logger.error("Failed to start browser session")
                 return False
+
+            logger.info("Browser session started")
+
+            # 🔥 TRY COOKIE RESTORE HERE
+            restored = load_cookies(self.selenium.driver, self.base_url)
+            if restored:
+                logger.info("Cookies loaded, checking session validity")
+                if self.check_session_valid():
+                    self.logged_in = True
+                    self.otp_required = False
+                    logger.info("Session restored from cookies")
+                else:
+                    logger.info("Cookies present but session invalid")
+
+            return True
         except Exception as e:
             logger.error(f"Error starting session: {e}")
             return False
@@ -246,7 +279,11 @@ class SessionManager:
                         if current_url and ("dashboard" in current_url or "user" in current_url):
                             self.logged_in = True
                             self.otp_required = False
-                            logger.info("Login successful after Sign In button")
+
+                            # 🔥 SAVE COOKIES HERE
+                            save_cookies(self.selenium.driver)
+                            logger.info("Cookies saved after OTP login")
+
                             return True, "Login successful"
             
             # Check for success/error status messages
@@ -258,7 +295,11 @@ class SessionManager:
                 if "verified successfully" in status_text.lower():
                     self.logged_in = True
                     self.otp_required = False
-                    logger.info("OTP verified successfully")
+
+                    # 🔥 SAVE COOKIES HERE
+                    save_cookies(self.selenium.driver)
+                    logger.info("Cookies saved after OTP verified")
+
                     return True, "OTP verified successfully"
                 elif "invalid" in status_text.lower() or "expired" in status_text.lower():
                     return False, f"OTP verification failed: {status_text}"
@@ -266,29 +307,21 @@ class SessionManager:
             # If we reach here, assume successful verification
             self.logged_in = True
             self.otp_required = False
+            save_cookies(self.selenium.driver)
+            logger.info("Cookies saved (assumed success)")
             logger.info("OTP verification completed (assumed successful)")
+            
             return True, "OTP verification completed"
         
         except Exception as e:
             logger.error(f"OTP verification failed: {e}")
             self.selenium.take_screenshot("otp_verification_error.png")
             return False, f"OTP verification error: {e}"
-            
-            # If no status message, check URL change
-            time.sleep(2)
-            current_url = self.selenium.get_current_url()
-            if current_url and ("dashboard" in current_url or "user" in current_url):
-                self.logged_in = True
-                self.otp_required = False
-                logger.info("Login successful")
-                return True, "Login successful"
-            
-            return False, "OTP verification failed"
-            
+          
         except Exception as e:
             logger.error(f"OTP verification error: {e}")
             return False, f"OTP verification error: {str(e)}"
-    
+        
     def check_session_valid(self):
         """
         Check if current session is still valid

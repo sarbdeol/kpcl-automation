@@ -165,6 +165,7 @@ def api_verify_otp():
             app_state['logged_in'] = True
             socketio.emit('status_update', app_state)
             
+            
         return jsonify({'success': success, 'message': message})
         
     except Exception as e:
@@ -177,8 +178,10 @@ def api_start_automation():
     global scheduler, app_state
     
     try:
-        if not app_state['logged_in']:
+        if not session_manager or not session_manager.check_session_valid():
+            app_state['logged_in'] = False
             return jsonify({'success': False, 'message': 'Please login first'})
+
         
         config = load_config()
         
@@ -320,6 +323,62 @@ def handle_disconnect():
     """Handle WebSocket disconnection"""
     logger.info('Client disconnected')
 
+@app.route('/api/session/status')
+def api_session_status():
+    global session_manager
+
+    # 1️⃣ Ensure session manager exists
+    if not session_manager:
+        from automation.session_manager import SessionManager
+        config = load_config()
+        session_manager = SessionManager(config)
+
+    selenium_alive = False
+    selenium_logged_in = False
+
+    # 2️⃣ Ensure Selenium is attached to Chrome (9222)
+    if not session_manager.selenium.driver:
+        try:
+            session_manager.start_session()  # attach to :9222
+        except Exception as e:
+            return jsonify({
+                "selenium_alive": False,
+                "logged_in": False,
+                "automation_running": app_state['status'] in ['running', 'scheduled'],
+                "error": "Chrome not reachable on port 9222"
+            })
+
+    # 3️⃣ Now Selenium exists
+    selenium_alive = True
+
+    try:
+        selenium_logged_in = session_manager.check_session_valid()
+    except Exception:
+        selenium_logged_in = False
+
+    # 4️⃣ Sync Flask state
+    app_state['logged_in'] = selenium_logged_in
+    app_state['otp_required'] = session_manager.otp_required
+
+    return jsonify({
+        "selenium_alive": selenium_alive,
+        "logged_in": selenium_logged_in,
+        "automation_running": app_state['status'] in ['running', 'scheduled']
+    })
+
+def restore_session_state():
+    global session_manager, app_state
+
+    config = load_config()
+    session_manager = SessionManager(config)
+
+    if session_manager.selenium.driver:
+        if session_manager.check_session_valid():
+            app_state['logged_in'] = True
+            app_state['otp_required'] = False
+            logger.info("Recovered existing Selenium login session")
+        else:
+            logger.info("Selenium exists but session invalid")
 if __name__ == '__main__':
     # Create necessary directories
     os.makedirs('logs', exist_ok=True)
@@ -336,7 +395,7 @@ if __name__ == '__main__':
             json.dump(form_data, f, indent=2)
     
     logger.info("Starting KPCL Automation Application")
-    
+    restore_session_state()
     # Run the application
     socketio.run(app, host='0.0.0.0', port=5001, debug=True, allow_unsafe_werkzeug=True)
 

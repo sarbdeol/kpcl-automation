@@ -562,9 +562,38 @@ class KPCLApp {
         const bsToast = new bootstrap.Toast(toast);
         bsToast.show();
     }
+    
 }
 
 // Initialize application when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     window.kpclApp = new KPCLApp();
+});
+
+window.addEventListener("load", async () => {
+    try {
+        window.kpclApp.addLogEntry(
+                "checking login session status...",
+                "success"
+            );
+        const res = await fetch("/api/session/status");
+        const data = await res.json();
+        
+        if (!window.kpclApp) return;
+
+        if (data.logged_in) {
+            window.kpclApp.showControlSection();
+            window.kpclApp.addLogEntry(
+                "Recovered active KPCL session",
+                "success"
+            );
+        } else {
+            // explicit login view
+            document.getElementById("login-section").style.display = "block";
+            document.getElementById("otp-section").style.display = "none";
+            document.getElementById("control-section").style.display = "none";
+        }
+    } catch (err) {
+        console.error("Session restore failed", err);
+    }
 });
