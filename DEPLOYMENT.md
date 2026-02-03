@@ -122,7 +122,7 @@ sudo systemctl status kpcl-automation
 sudo journalctl -u kpcl-automation -f
 
 # Application logs
-tail -f /home/ec2-user/kpcl-automation/logs/app.log
+tail -f /root/kpcl-automation/logs/app.log
 ```
 
 ### Health Check

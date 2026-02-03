@@ -43,7 +43,7 @@ jobs:
         username: ${{ secrets.EC2_USERNAME }}
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
-          cd /home/ec2-user/kpcl-automation
+          cd /home/ubuntu/kpcl-automation
           git pull origin main
           source venv/bin/activate
           pip install -r requirements.txt
