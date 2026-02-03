@@ -59,7 +59,7 @@ mkdir -p screenshots logs
 echo "🔒 Setting permissions..."
 chmod +x docker-entrypoint.sh
 chmod +x deploy-ec2.sh
-sudo chown -R ec2-user:ec2-user /home/ec2-user/kpcl-automation
+sudo chown -R ec2-user:ec2-user /root/kpcl-automation
 
 # Install systemd service
 echo "🔧 Installing systemd service..."

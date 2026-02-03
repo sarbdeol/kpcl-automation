@@ -131,7 +131,7 @@ sudo journalctl -u kpcl-automation -f
 sudo systemctl restart kpcl-automation
 
 # Update application
-cd /home/ec2-user/kpcl-automation
+cd /root/kpcl-automation
 git pull origin main
 sudo systemctl restart kpcl-automation
 ```
@@ -139,7 +139,7 @@ sudo systemctl restart kpcl-automation
 ## 🆘 Need Help?
 
 1. **Check Logs**: `sudo journalctl -u kpcl-automation --no-pager`
-2. **Verify Config**: `cat /home/ec2-user/kpcl-automation/.env`
+2. **Verify Config**: `cat /root/kpcl-automation/.env`
 3. **Test Manually**: Access `http://YOUR_EC2_IP:5001`
 4. **GitHub Issues**: Create issue with logs
 

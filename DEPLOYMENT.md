@@ -220,8 +220,8 @@ sudo rm /usr/local/bin/chromedriver
 #### Permission Issues
 ```bash
 # Fix permissions
-sudo chown -R ec2-user:ec2-user /home/ec2-user/kpcl-automation
-chmod +x /home/ec2-user/kpcl-automation/docker-entrypoint.sh
+sudo chown -R ec2-user:ec2-user /root/kpcl-automation
+chmod +x /root/kpcl-automation/docker-entrypoint.sh
 ```
 
 #### Service Won't Start
@@ -248,7 +248,7 @@ For deployment issues:
 
 ### Manual Update
 ```bash
-cd /home/ec2-user/kpcl-automation
+cd /root/kpcl-automation
 git pull origin main
 source venv/bin/activate
 pip install -r requirements.txt

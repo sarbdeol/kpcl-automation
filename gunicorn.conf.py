@@ -23,8 +23,8 @@ max_requests = 1000
 max_requests_jitter = 50
 
 # Logging
-accesslog = "/home/ec2-user/kpcl-automation/logs/gunicorn_access.log"
-errorlog = "/home/ec2-user/kpcl-automation/logs/gunicorn_error.log"
+accesslog = "/root/kpcl-automation/logs/gunicorn_access.log"
+errorlog = "/root/kpcl-automation/logs/gunicorn_error.log"
 loglevel = "info"
 access_log_format = '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"'
 
@@ -33,7 +33,7 @@ proc_name = "kpcl-automation"
 
 # Server mechanics
 daemon = False
-pidfile = "/home/ec2-user/kpcl-automation/logs/gunicorn.pid"
+pidfile = "/root/kpcl-automation/logs/gunicorn.pid"
 user = None
 group = None
 tmp_upload_dir = None
@@ -55,7 +55,7 @@ max_worker_memory = 200  # MB
 # Environment
 raw_env = [
     'FLASK_ENV=production',
-    'PYTHONPATH=/home/ec2-user/kpcl-automation'
+    'PYTHONPATH=/root/kpcl-automation'
 ]
 
 def when_ready(server):

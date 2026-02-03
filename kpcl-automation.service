@@ -6,10 +6,10 @@ After=network.target
 Type=exec
 User=ec2-user
 Group=ec2-user
-WorkingDirectory=/home/ec2-user/kpcl-automation
-Environment=PATH=/home/ec2-user/kpcl-automation/venv/bin:/usr/local/bin:/usr/bin:/bin
-Environment=PYTHONPATH=/home/ec2-user/kpcl-automation
-ExecStart=/home/ec2-user/kpcl-automation/venv/bin/gunicorn --config /home/ec2-user/kpcl-automation/gunicorn.conf.py app:app
+WorkingDirectory=/root/kpcl-automation
+Environment=PATH=/root/kpcl-automation/venv/bin:/usr/local/bin:/usr/bin:/bin
+Environment=PYTHONPATH=/root/kpcl-automation
+ExecStart=/root/kpcl-automation/venv/bin/gunicorn --config /root/kpcl-automation/gunicorn.conf.py app:app
 ExecReload=/bin/kill -s HUP $MAINPID
 KillMode=mixed
 TimeoutStopSec=5
@@ -18,13 +18,13 @@ Restart=always
 RestartSec=10
 
 # Environment variables
-EnvironmentFile=-/home/ec2-user/kpcl-automation/.env
+EnvironmentFile=-/root/kpcl-automation/.env
 
 # Security settings
 NoNewPrivileges=false
 # ProtectSystem=strict
 # ProtectHome=true
-ReadWritePaths=/home/ec2-user/kpcl-automation
+ReadWritePaths=/root/kpcl-automation
 # RestrictRealtime=true
 # RestrictNamespaces=true
 
