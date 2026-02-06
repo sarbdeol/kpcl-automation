@@ -46,48 +46,53 @@ class ConfigManager {
     }
     
     async saveAppSettings() {
-        const form = document.getElementById('app-settings-form');
-        const formData = new FormData(form);
-        
-        // Convert FormData to object
-        const config = {};
-        for (let [key, value] of formData.entries()) {
-            if (key === 'headless') {
-                config[key] = value === 'on';
-            } else if (key === 'max_retries' || key === 'retry_interval') {
-                config[key] = parseInt(value);
-            } else if (key === 'schedule_time') {
-                config[key] = value + ':01'; // Add seconds
-            } else {
-                config[key] = value;
-            }
-        }
-        
-        // Handle unchecked checkbox
-        if (!formData.has('headless')) {
-            config.headless = false;
-        }
-        
-        try {
-            const response = await fetch('/api/save_config', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ config })
-            });
-            
-            const data = await response.json();
-            
-            if (data.success) {
-                this.showNotification('App settings saved successfully', 'success');
-            } else {
-                this.showNotification(data.message || 'Failed to save settings', 'error');
-            }
-        } catch (error) {
-            this.showNotification('Failed to save app settings', 'error');
-            console.error('Save app settings error:', error);
+    const form = document.getElementById('app-settings-form');
+    const formData = new FormData(form);
+    
+    // Convert FormData to object
+    const config = {};
+    for (let [key, value] of formData.entries()) {
+        if (key === 'headless') {
+            config[key] = value === 'on';
+        } else if (key === 'max_retries' || key === 'retry_interval') {
+            config[key] = parseInt(value);
+        } else if (key === 'schedule_time') {
+            config[key] = value + ':01'; // Add seconds
+        } else {
+            config[key] = value;
         }
     }
     
+    // Handle unchecked checkbox
+    if (!formData.has('headless')) {
+        config.headless = false;
+    }
+    
+    try {
+        const response = await fetch('/api/save_config', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ 
+                config,
+                preserve_form_data: true  // Flag to preserve existing form data
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            this.showNotification('App settings saved successfully', 'success');
+        } else {
+            this.showNotification(data.message || 'Failed to save settings', 'error');
+        }
+    } catch (error) {
+        this.showNotification('Failed to save app settings', 'error');
+        console.error('Save app settings error:', error);
+    }
+    }
+
     async saveFormData() {
         const form = document.getElementById('form-data-form');
         const formData = new FormData(form);
@@ -101,8 +106,13 @@ class ConfigManager {
         try {
             const response = await fetch('/api/save_config', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ form_data })
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    form_data,
+                    preserve_app_config: true  // Flag to preserve existing app config
+                })
             });
             
             const data = await response.json();
@@ -117,7 +127,6 @@ class ConfigManager {
             console.error('Save form data error:', error);
         }
     }
-    
     exportConfiguration() {
         // Get current form values
         const appConfig = this.getAppConfigFromForm();

@@ -293,21 +293,36 @@ def api_save_config():
     """Save configuration"""
     try:
         data = request.get_json()
-        config = data.get('config', {})
-        form_data = data.get('form_data', {})
+        new_config = data.get('config', {})
+        new_form_data = data.get('form_data', {})
         
-        save_config(config)
+        # Load existing configuration
+        existing_config = load_config()
         
-        os.makedirs('config', exist_ok=True)
-        with open('config/form_data.json', 'w') as f:
-            json.dump(form_data, f, indent=2)
+        # Load existing form data
+        existing_form_data = {}
+        form_data_path = 'config/form_data.json'
+        if os.path.exists(form_data_path):
+            with open(form_data_path, 'r') as f:
+                existing_form_data = json.load(f)
+        
+        # Merge configurations (only update if new data is provided)
+        if new_config:
+            existing_config.update(new_config)
+            save_config(existing_config)
+        
+        # Merge form data (only update if new data is provided)
+        if new_form_data:
+            existing_form_data.update(new_form_data)
+            os.makedirs('config', exist_ok=True)
+            with open(form_data_path, 'w') as f:
+                json.dump(existing_form_data, f, indent=2)
         
         return jsonify({'success': True, 'message': 'Configuration saved'})
         
     except Exception as e:
         logger.error(f"Save config error: {e}")
         return jsonify({'success': False, 'message': str(e)})
-
 @app.route('/api/status')
 def api_status():
     """Get current application status"""
