@@ -10,7 +10,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from automation.form_filler import FormFiller
 import json
-
+from pytz import timezone
 logger = logging.getLogger(__name__)
 
 class AutomationScheduler:
@@ -26,7 +26,11 @@ class AutomationScheduler:
         """
         self.config = config
         self.socketio = socketio
-        self.scheduler = BackgroundScheduler()
+        
+
+        self.scheduler = BackgroundScheduler(
+            timezone=timezone("Asia/Kolkata")
+)
         self.form_filler = None
         self.username = None
         self.password = None
@@ -94,7 +98,8 @@ class AutomationScheduler:
                 trigger=CronTrigger(
                     hour=self.schedule_time.hour,
                     minute=self.schedule_time.minute,
-                    second=self.schedule_time.second
+                    second=self.schedule_time.second,
+                    timezone="Asia/Kolkata"
                 ),
                 id='form_submission',
                 name='KPCL Form Submission',
